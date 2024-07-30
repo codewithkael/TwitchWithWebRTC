@@ -1,4 +1,4 @@
-package com.codewithkael.twitchwithwebrtc
+package com.codewithkael.twitchwithwebrtc.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
