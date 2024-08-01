@@ -79,7 +79,7 @@ fun MainScreen(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.webrtc),
+            painter = painterResource(id = R.drawable.ic_twitch),
             contentDescription = "YouTube Channel",
             modifier = Modifier
                 .padding(10.dp)

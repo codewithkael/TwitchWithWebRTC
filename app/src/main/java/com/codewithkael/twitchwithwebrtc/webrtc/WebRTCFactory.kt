@@ -3,7 +3,6 @@ package com.codewithkael.twitchwithwebrtc.webrtc
 import android.app.Application
 import android.content.Context
 import com.codewithkael.twitchwithwebrtc.utils.MyApplication.Companion.STREAM_ID
-import com.google.gson.Gson
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraVideoCapturer
@@ -23,7 +22,6 @@ import javax.inject.Inject
 
 class WebRTCFactory @Inject constructor(
     private val application: Application,
-    private val gson: Gson,
 ) {
     private val peerConnectionFactory by lazy { createPeerConnectionFactory() }
     private val eglBaseContext = EglBase.create().eglBaseContext
@@ -34,22 +32,6 @@ class WebRTCFactory @Inject constructor(
         IceServer.builder("stun:194.149.74.157:3478").createIceServer(),
         IceServer.builder("stun:193.22.119.20:3478").createIceServer(),
         IceServer.builder("stun:stun.relay.metered.ca:80").createIceServer(),
-        IceServer.builder("turn:global.relay.metered.ca:80")
-            .setUsername("0da9dc3f3ca0b8aef7388ca9")
-            .setPassword("KuuHVTmXU80Q1WMO")
-            .createIceServer(),
-        IceServer.builder("turn:global.relay.metered.ca:80?transport=tcp")
-            .setUsername("0da9dc3f3ca0b8aef7388ca9")
-            .setPassword("KuuHVTmXU80Q1WMO")
-            .createIceServer(),
-        IceServer.builder("turn:global.relay.metered.ca:443")
-            .setUsername("0da9dc3f3ca0b8aef7388ca9")
-            .setPassword("KuuHVTmXU80Q1WMO")
-            .createIceServer(),
-        IceServer.builder("turns:global.relay.metered.ca:443?transport=tcp")
-            .setUsername("0da9dc3f3ca0b8aef7388ca9")
-            .setPassword("KuuHVTmXU80Q1WMO")
-            .createIceServer()
     )
     private var videoCapturer: CameraVideoCapturer? = null
 
@@ -127,7 +109,7 @@ class WebRTCFactory @Inject constructor(
     private fun getVideoCapturer(): CameraVideoCapturer {
         return Camera2Enumerator(application).run {
             deviceNames.find {
-                isFrontFacing(it)
+                isBackFacing(it)
             }?.let {
                 createCapturer(it, null)
             } ?: throw IllegalStateException()
@@ -144,15 +126,17 @@ class WebRTCFactory @Inject constructor(
         }
     }
 
-    fun createStreamerClient(
+    fun createRTCClient(
         observer: PeerConnection.Observer,
-        listener: StreamerRTCClientImpl.TransferStreamerDataToServerListener
+        listener: RTCClientImpl.TransferStreamerDataToServerListener
     ): RTCClient? {
         val connection = peerConnectionFactory.createPeerConnection(
             PeerConnection.RTCConfiguration(iceServer), observer
         )
-        connection?.addStream(localStream)
-        return connection?.let { StreamerRTCClientImpl(it, listener) }
+        localStream?.let {
+            connection?.addStream(localStream)
+        }
+        return connection?.let { RTCClientImpl(it, listener) }
     }
 
     interface LocalStreamListener {

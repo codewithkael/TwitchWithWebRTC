@@ -7,5 +7,5 @@ object Constants {
     const val STREAMER_SCREEN = "StreamerScreen"
     fun getViewerScreen(streamId: String) = "ViewerScreen/$streamId"
     val REMOTE_SOCKET_URL = "ws://164.92.142.251:3333/app/$STREAM_ID?direction=send"
-
+    fun getStreamPath(id:String)="ws://164.92.142.251:3333/app/$id"
 }

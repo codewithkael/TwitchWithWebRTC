@@ -1,7 +1,6 @@
 package com.codewithkael.twitchwithwebrtc.webrtc
 
 import com.codewithkael.twitchwithwebrtc.utils.MessageModel
-import com.codewithkael.twitchwithwebrtc.utils.MyApplication.Companion.REMOTE_CALL_ID
 import com.codewithkael.twitchwithwebrtc.utils.MyIceCandidates
 import com.codewithkael.twitchwithwebrtc.utils.MySessionDescription
 import kotlinx.coroutines.CoroutineScope
@@ -13,14 +12,14 @@ import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 
-class StreamerRTCClientImpl(
+class RTCClientImpl(
     connection: PeerConnection,
     private val transferListener: TransferStreamerDataToServerListener
 ) : RTCClient {
 
     private var remoteMessageModel = MessageModel(command = "answer")
-    private fun resetLocalOffer() {
-        remoteMessageModel = MessageModel(command = "answer", id = REMOTE_CALL_ID)
+    private fun resetLocalOffer(id:Int) {
+        remoteMessageModel = MessageModel(command = "answer", id = id)
     }
 
     private val mediaConstraint = MediaConstraints().apply {
@@ -30,9 +29,8 @@ class StreamerRTCClientImpl(
 
     override val peerConnection: PeerConnection = connection
 
-    override fun answer() {
-        resetLocalOffer()
-
+    override fun answer(id:Int) {
+        resetLocalOffer(id)
         peerConnection.createAnswer(object : MySdpObserver() {
             override fun onCreateSuccess(desc: SessionDescription?) {
                 super.onCreateSuccess(desc)

@@ -3,7 +3,7 @@ package com.codewithkael.twitchwithwebrtc.ui.viewModel
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import com.codewithkael.twitchwithwebrtc.remote.socket.RemoteSocketClient
-import com.codewithkael.twitchwithwebrtc.utils.Constants.REMOTE_SOCKET_URL
+import com.codewithkael.twitchwithwebrtc.utils.Constants.getStreamPath
 import com.codewithkael.twitchwithwebrtc.utils.MessageModel
 import com.codewithkael.twitchwithwebrtc.utils.toWebrtcCandidate
 import com.codewithkael.twitchwithwebrtc.utils.toWebrtcSessionDescription
@@ -19,21 +19,22 @@ import javax.inject.Inject
 
 @SuppressLint("StaticFieldLeak")
 @HiltViewModel
-class StreamerViewModel @Inject constructor(
-    private val webRTCFactory: WebRTCFactory,
-    private val socketClient: RemoteSocketClient
+class ViewerViewModel @Inject constructor(
+    private val socketClient: RemoteSocketClient,
+    private val webRTCFactory: WebRTCFactory
 ) : ViewModel(), RemoteSocketClient.RemoteSocketServerListener {
 
     //variables
-    private var localSurface: SurfaceViewRenderer? = null
     private var remoteRTCClient: RTCClient? = null
+    private var remoteSurface: SurfaceViewRenderer? = null
 
-    //states
-
-    private fun initSocketClient() {
-        socketClient.init(REMOTE_SOCKET_URL, this)
+    fun init(streamId: String) {
+        initSocketClient(streamId)
     }
 
+    private fun initSocketClient(streamId: String) {
+        socketClient.init(getStreamPath(streamId), this@ViewerViewModel)
+    }
 
     private fun initRemoteRTCClient() {
         runCatching {
@@ -46,6 +47,11 @@ class StreamerViewModel @Inject constructor(
                     super.onIceCandidate(p0)
                     p0?.let { remoteRTCClient?.onLocalIceCandidateGenerated(it) }
                 }
+
+                override fun onAddStream(p0: MediaStream?) {
+                    super.onAddStream(p0)
+                    p0?.videoTracks?.get(0)?.addSink(remoteSurface)
+                }
             },
             object : RTCClientImpl.TransferStreamerDataToServerListener {
                 override fun onTransferEventToSocket(data: MessageModel) {
@@ -55,24 +61,6 @@ class StreamerViewModel @Inject constructor(
         )
     }
 
-
-    fun onLocalSurfaceReady(localSurface: SurfaceViewRenderer) {
-        webRTCFactory.prepareLocalStream(localSurface, object : WebRTCFactory.LocalStreamListener {
-            override fun onLocalStreamReady(mediaStream: MediaStream) {
-                mediaStream.videoTracks[0]?.let {
-                    it.addSink(localSurface)
-                    initSocketClient()
-                }
-            }
-        })
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        localSurface?.release()
-        localSurface = null
-        webRTCFactory.onDestroy()
-    }
 
     override fun onRemoteSocketClientOpened() {
         socketClient.sendDataToHost(
@@ -97,5 +85,17 @@ class StreamerViewModel @Inject constructor(
             }
             remoteRTCClient?.answer(message.id!!)
         }
+    }
+
+    fun onRemoteSurfaceReady(remoteSurface: SurfaceViewRenderer) {
+        this.remoteSurface = remoteSurface
+        webRTCFactory.initSurfaceView(remoteSurface)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        remoteSurface?.release()
+        remoteSurface = null
+        webRTCFactory.onDestroy()
     }
 }

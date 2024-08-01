@@ -7,7 +7,7 @@ interface RTCClient {
 
     val peerConnection :PeerConnection
     fun onDestroy()
-    fun answer()
+    fun answer(id:Int)
     fun onRemoteSessionReceived(sessionDescription: SessionDescription)
     fun onIceCandidateReceived(iceCandidate: IceCandidate)
     fun onLocalIceCandidateGenerated(iceCandidate: IceCandidate)

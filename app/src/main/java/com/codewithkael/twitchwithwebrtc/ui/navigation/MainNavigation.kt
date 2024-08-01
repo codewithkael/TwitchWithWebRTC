@@ -20,15 +20,14 @@ fun MainNavigation() {
             MainScreen(navController = navController)
         }
         composable(STREAMER_SCREEN) {
-            StreamerScreen(navController = navController)
+            StreamerScreen()
         }
         composable(
             "ViewerScreen/{streamId}",
             arguments = listOf(navArgument("streamId") { type = NavType.StringType })
         ) {
             ViewerScreen(
-                navController = navController,
-                streamId = it.arguments?.getString("serverAddress")
+                streamId = it.arguments?.getString("streamId")
             )
         }
     }
