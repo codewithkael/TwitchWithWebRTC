@@ -2,8 +2,9 @@ package com.codewithkael.twitchwithwebrtc.webrtc
 
 import org.webrtc.*
 
-open class PeerConnectionObserver : PeerConnection.Observer{
+open class MyPeerObserver : PeerConnection.Observer{
     override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
+
     }
 
     override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
