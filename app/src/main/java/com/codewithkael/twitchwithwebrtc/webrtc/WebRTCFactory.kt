@@ -1,5 +1,6 @@
 package com.codewithkael.twitchwithwebrtc.webrtc
 
+import android.app.Application
 import android.content.Context
 import com.codewithkael.twitchwithwebrtc.utils.MyApplication.Companion.STREAM_ID
 import com.google.gson.Gson
@@ -21,7 +22,7 @@ import javax.inject.Inject
 
 
 class WebRTCFactory @Inject constructor(
-    private val context: Context,
+    private val application: Application,
     private val gson: Gson,
 ) {
     private val peerConnectionFactory by lazy { createPeerConnectionFactory() }
@@ -62,10 +63,10 @@ class WebRTCFactory @Inject constructor(
     private var localStreamListener: LocalStreamListener? = null
 
     init {
-        initPeerConnectionFactory(context)
+        initPeerConnectionFactory(application)
     }
 
-    private fun prepareLocalStream(
+    fun prepareLocalStream(
         view: SurfaceViewRenderer,
         localStreamListener: LocalStreamListener
     ) {
@@ -80,6 +81,26 @@ class WebRTCFactory @Inject constructor(
             setEnableHardwareScaler(true)
             init(eglBaseContext, null)
         }
+    }
+
+    private fun initPeerConnectionFactory(application: Context) {
+        val options = PeerConnectionFactory.InitializationOptions.builder(application)
+            .setEnableInternalTracer(true).setFieldTrials("WebRTC-H264HighProfile/Enabled/")
+            .createInitializationOptions()
+        PeerConnectionFactory.initialize(options)
+    }
+
+    private fun createPeerConnectionFactory(): PeerConnectionFactory {
+        return PeerConnectionFactory.builder().setVideoDecoderFactory(
+            DefaultVideoDecoderFactory(eglBaseContext)
+        ).setVideoEncoderFactory(
+            DefaultVideoEncoderFactory(
+                eglBaseContext, true, true
+            )
+        ).setOptions(PeerConnectionFactory.Options().apply {
+            disableEncryption = false
+            disableNetworkMonitor = false
+        }).createPeerConnectionFactory()
     }
 
     private fun startLocalVideo(surface: SurfaceViewRenderer) {
@@ -104,33 +125,13 @@ class WebRTCFactory @Inject constructor(
     }
 
     private fun getVideoCapturer(): CameraVideoCapturer {
-        return Camera2Enumerator(context).run {
+        return Camera2Enumerator(application).run {
             deviceNames.find {
                 isFrontFacing(it)
             }?.let {
                 createCapturer(it, null)
             } ?: throw IllegalStateException()
         }
-    }
-
-    private fun initPeerConnectionFactory(application: Context) {
-        val options = PeerConnectionFactory.InitializationOptions.builder(application)
-            .setEnableInternalTracer(true).setFieldTrials("WebRTC-H264HighProfile/Enabled/")
-            .createInitializationOptions()
-        PeerConnectionFactory.initialize(options)
-    }
-
-    private fun createPeerConnectionFactory(): PeerConnectionFactory {
-        return PeerConnectionFactory.builder().setVideoDecoderFactory(
-            DefaultVideoDecoderFactory(eglBaseContext)
-        ).setVideoEncoderFactory(
-            DefaultVideoEncoderFactory(
-                eglBaseContext, true, true
-            )
-        ).setOptions(PeerConnectionFactory.Options().apply {
-            disableEncryption = false
-            disableNetworkMonitor = false
-        }).createPeerConnectionFactory()
     }
 
 
@@ -154,5 +155,7 @@ class WebRTCFactory @Inject constructor(
         return connection?.let { StreamerRTCClientImpl(it, listener) }
     }
 
-
+    interface LocalStreamListener {
+        fun onLocalStreamReady(mediaStream: MediaStream)
+    }
 }
