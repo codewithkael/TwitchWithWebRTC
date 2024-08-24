@@ -32,16 +32,16 @@ Ensure Docker is installed and running on your Linux system. Follow the official
 
 To deploy the Oven Media Engine, use the following Docker command:
 
-----to setup the oven media engine simply run this----
+## to setup the oven media engine simply run this
 docker run --name ome -d -e OME_HOST_IP=YOUR_IP_ADDRESS \
 -p 1935:1935 -p 9999:9999/udp -p 9000:9000 -p 3333:3333 \
 -p 3478:3478 -p 10000-10009:10000-10009/udp \
 airensoft/ovenmediaengine:0.15.13
 
-----for oven player use this----
+## for oven player use this
 docker run -d -p 8090:80 airensoft/ovenplayerdemo:latest
 
-----oven player url is here----
+## oven player url is here
 http://YOUR_IP_ADDRESS:8090/
 
 ## Tutorial Video
