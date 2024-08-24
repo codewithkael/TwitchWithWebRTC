@@ -2,7 +2,7 @@
 
 Welcome to the GitHub repository for our comprehensive tutorial on building a streaming service using Android development with Kotlin, Jetpack Compose, and WebRTC, alongside deploying the Oven Media Engine. This course will guide you through creating a complete streaming solution, including both the Android client and the server-side setup with Oven Media Engine.
 
-**Watch the Tutorial here:** [www.youtube.com/@codewithkael](https://youtube.com/playlist?list=PLFelST8t9nqgkQsqbapT2JJeQJ8F4JU2g&si=yDxsuzwp-Lw3zA7S)
+**Watch the Tutorial here:** [www.youtube.com/@codewithkael](https://youtube.com/playlist?list=PLFelST8t9nqj8HCUGDypLdeX7E9gNKeAa&si=DyeEKITOL7LH0UD4)
 
 ## What You Will Learn
 1. **Kotlin for Android Development:** Master Kotlin programming for Android to build robust and scalable applications.
